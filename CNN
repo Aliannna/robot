@@ -1,0 +1,69 @@
+%matplotlib inline
+
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from keras.datasets import mnist, cifar10
+from keras.utils import to_categorical
+
+# Load dataset, add channel dimension for images, and one-hot encode labels
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+X_train = np.expand_dims(X_train, axis=-1)
+X_test = np.expand_dims(X_test, axis=-1)
+y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10)
+
+print("X_train shape", X_train.shape)
+print("y_train shape", y_train.shape)
+print("X_test shape", X_test.shape)
+print("y_test shape", y_test.shape)
+
+# Convert type and normalize
+X_train.astype('float32')
+X_test.astype('float32')
+X_train = X_train / 255.0
+X_test = X_test / 255.0
+
+# Display first image in training set
+plt.imshow(X_train[0])
+print('Label: ' + str(np.argmax(y_train[0])))
+
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.optimizers import Adam
+
+# Flatten the train images into vectors
+X_train_flattened = X_train.reshape(-1, 28*28)
+X_test_flattened = X_test.reshape(-1, 28*28)
+
+print("X_train_flattened shape", X_train_flattened.shape)
+print("X_test_flattened shape", X_test_flattened.shape)
+
+# Build model
+model = Sequential()
+
+model.add(Dense(512, input_shape=(784,), activation='relu'))
+model.add(Dropout(0.2))
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.2))
+model.add(Dense(10, activation='softmax'))
+
+model.summary()
+
+# Create optimizer and compile
+optimizer = Adam(learning_rate=0.001)
+model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Train model
+model.fit(X_train_flattened, y_train, batch_size=128, epochs=5, 
+          validation_data=(X_test_flattened, y_test), verbose=1)
+
+# Evaluate model on test data
+loss, acc = model.evaluate(X_test_flattened, y_test, batch_size=32)
+print("Test loss is " + str(loss))
+print("Test accuracy is " + str(acc))
+
+# Predicted class of each image in test set
+np.argmax(model.predict(X_test_flattened), axis=-1)
+
+
