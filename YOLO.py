@@ -2,6 +2,7 @@ from IPython.display import display, Javascript, Image
 from google.colab.output import eval_js
 from google.colab.patches import cv2_imshow
 from base64 import b64decode, b64encode
+from picamera import PiCamera
 import cv2
 import numpy as np
 import PIL
@@ -62,56 +63,6 @@ for label, confidence, bbox in detections:
                     class_colors[label], 2)
 cv2_imshow(image)
 
-# function to convert OpenCV Rectangle bounding box image into base64 byte string to be overlayed on video stream
-def bbox_to_bytes(bbox_array):
-  """
-  Params:
-          bbox_array: Numpy array (pixels) containing rectangle to overlay on video stream.
-  Returns:
-        bytes: Base64 image byte string
-  """
-  # convert array into PIL image
-  bbox_PIL = PIL.Image.fromarray(bbox_array, 'RGBA')
-  iobuf = io.BytesIO()
-  # format bbox into png for return
-  bbox_PIL.save(iobuf, format='png')
-  # format return string
-  bbox_bytes = 'data:image/png;base64,{}'.format((str(b64encode(iobuf.getvalue()), 'utf-8')))
-
-  return bbox_bytes
-
-  # get photo data
-  data = eval_js('takePhoto({})'.format(quality))
-  # get OpenCV format image
-  img = js_to_image(data) 
-  
-  # call our darknet helper on webcam image
-  detections, width_ratio, height_ratio = darknet_helper(img, width, height)
-
-  # loop through detections and draw them on webcam image
-  for label, confidence, bbox in detections:
-    left, top, right, bottom = bbox2points(bbox)
-    left, top, right, bottom = int(left * width_ratio), int(top * height_ratio), int(right * width_ratio), int(bottom * height_ratio)
-    cv2.rectangle(img, (left, top), (right, bottom), class_colors[label], 2)
-    cv2.putText(img, "{} [{:.2f}]".format(label, float(confidence)),
-                      (left, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                      class_colors[label], 2)
-  # save image
-  cv2.imwrite(filename, img)
-
-  return filename
-
-  try:
-  filename = take_photo('photo.jpg')
-  print('Saved to {}'.format(filename))
-  
-  # Show the image which was just taken.
-  display(Image(filename))
-except Exception as err:
-  # Errors will be thrown if the user does not have a webcam or if they do not
-  # grant the page permission to access it.
-  print(str(err))
-
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
 camera.resolution = (640, 480)
@@ -121,35 +72,30 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 # allow the camera to warm up
 time.sleep(0.1)
 
-def video_stream():
-  for frame in camera.capture_continuous(rawCapture, format="bgr",
-                                         use_video_port=True):
+for frame in camera.capture_continuous(rawCapture, format="bgr",
+                                      use_video_port=True):
 
-      # grab the raw NumPy array representing the image, then 
-      # initialize the timestamp and occupied/unoccupied text
-      image = frame.array
+  # grab the raw NumPy array representing the image, then 
+  # initialize the timestamp and occupied/unoccupied text
+  image = frame.array
 
-      result = predictor.detect(image)
+  detections, width_ratio, height_ratio = darknet_helper(image, width, height)
 
-      for obj in result:
-          logger.info('coordinates: {} {}. class: "{}". confidence: {:.2f}'.
-                      format(obj[0], obj[1], obj[3], obj[2]))
+  for obj in result:
+    logger.info('coordinates: {} {}. class: "{}". confidence: {:.2f}'.
+                format(obj[0], obj[1], obj[3], obj[2]))
 
-          cv2.rectangle(image, obj[0], obj[1], (0, 255, 0), 2)
-          cv2.putText(image, '{}: {:.2f}'.format(obj[3], obj[2]),
-                      (obj[0][0], obj[0][1] - 5),
-                      cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 2)
+    cv2.rectangle(image, obj[0], obj[1], (0, 255, 0), 2)
+    cv2.putText(image, '{}: {:.2f}'.format(obj[3], obj[2]),
+                (obj[0][0], obj[0][1] - 5),
+                cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 2)
 
 
-    # show the frame
-    cv2.imshow("Stream", image)
-    key = cv2.waitKey(1) & 0xFF
+  # show the frame
+  cv2.imshow("Stream", image)
+  key = cv2.waitKey(1) & 0xFF
 
-def video_frame(label, bbox):
-  data = eval_js('stream_frame("{}", "{}")'.format(label, bbox))
-  return data
-
-  # start streaming video from webcam
+# start streaming video from webcam
 video_stream()
 # label for video
 label_html = 'Capturing...'

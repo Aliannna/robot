@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from keras.datasets import mnist, cifar10
 from keras.utils import to_categorical
+from keras.layers import Conv2D, BatchNormalization, Activation, MaxPooling2D, Flatten
+from keras.preprocessing.image import ImageDataGenerator
 
 # Load dataset, add channel dimension for images, and one-hot encode labels
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -65,5 +67,58 @@ print("Test accuracy is " + str(acc))
 
 # Predicted class of each image in test set
 np.argmax(model.predict(X_test_flattened), axis=-1)
+
+# Data generators with data augmentation for train images
+train_datagen = ImageDataGenerator(rotation_range=8, width_shift_range=0.08, 
+                                   height_shift_range=0.08, zoom_range=0.08)
+test_datagen = ImageDataGenerator()
+
+# Create generators using flow
+train_generator = train_datagen.flow(X_train, y_train, batch_size=128)
+test_generator = test_datagen.flow(X_test, y_test, batch_size=32)
+
+# Build cnn
+cnn = Sequential()
+cnn.add(Conv2D(32, (3,3), input_shape=(28,28,1)))
+cnn.add(BatchNormalization())
+cnn.add(Activation('relu'))
+
+cnn.add(Conv2D(32, (3,3)))
+cnn.add(BatchNormalization())
+cnn.add(Activation('relu'))
+cnn.add(MaxPooling2D(2,2))
+
+cnn.add(Conv2D(64, (3,3)))
+cnn.add(BatchNormalization())
+cnn.add(Activation('relu'))
+
+cnn.add(Conv2D(64, (3,3)))
+cnn.add(BatchNormalization())
+cnn.add(Activation('relu'))
+cnn.add(MaxPooling2D(2,2))
+cnn.add(Flatten())
+
+cnn.add(Dense(512))
+cnn.add(BatchNormalization())
+cnn.add(Activation('relu'))
+
+cnn.add(Dropout(0.2))
+cnn.add(Dense(10, activation='softmax'))
+
+cnn.summary()
+
+# Create optimizer and compile
+cnn.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Train model with generators
+cnn.fit(train_generator, epochs=5, validation_data=test_generator, verbose=1)
+
+# Evaluate model on test generator
+loss, acc = cnn.evaluate(test_generator)
+print("Test loss is " + str(loss))
+print("Test accuracy is " + str(acc))
+
+# Predicted class of each image in test set
+np.argmax(cnn.predict(X_test), axis=-1)
 
 
