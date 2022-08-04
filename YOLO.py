@@ -63,35 +63,33 @@ for label, confidence, bbox in detections:
 cv2_imshow(image)
 
 # initialize the camera and grab a reference to the raw camera capture
-camera = PiCamera()
-camera.resolution = (640, 480)
-camera.framerate = 32
-rawCapture = PiRGBArray(camera, size=(640, 480))
+# camera = PiCamera()
+# camera.resolution = (640, 480)
+# camera.framerate = 32
+# rawCapture = PiRGBArray(camera, size=(640, 480))
 
-# allow the camera to warm up
-time.sleep(0.1)
+# # allow the camera to warm up
+# time.sleep(0.1)
 
-for frame in camera.capture_continuous(rawCapture, format="bgr",
-                                      use_video_port=True):
+# for frame in camera.capture_continuous(rawCapture, format="bgr",
+#                                       use_video_port=True):
 
-  # grab the raw NumPy array representing the image, then 
-  # initialize the timestamp and occupied/unoccupied text
-  image = frame.array
+#   # grab the raw NumPy array representing the image, then 
+#   # initialize the timestamp and occupied/unoccupied text
+#   image = frame.array
 
-  detections, width_ratio, height_ratio = darknet_helper(image, width, height)
+#   detections, width_ratio, height_ratio = darknet_helper(image, width, height)
 
-  for label, confidence, bbox in detections:
-  left, top, right, bottom = bbox2points(bbox)
-  left, top, right, bottom = int(left * width_ratio), int(top * height_ratio), int(right * width_ratio), int(bottom * height_ratio)
-  cv2.rectangle(image, (left, top), (right, bottom), class_colors[label], 2)
-  cv2.putText(image, "{} [{:.2f}]".format(label, float(confidence)),
-                    (left, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                    class_colors[label], 2)
+#   for label, confidence, bbox in detections:
+#   left, top, right, bottom = bbox2points(bbox)
+#   left, top, right, bottom = int(left * width_ratio), int(top * height_ratio), int(right * width_ratio), int(bottom * height_ratio)
+#   cv2.rectangle(image, (left, top), (right, bottom), class_colors[label], 2)
+#   cv2.putText(image, "{} [{:.2f}]".format(label, float(confidence)),
+#                     (left, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+#                     class_colors[label], 2)
 
-
-
-  # show the frame
-  cv2.imshow("Stream", image)
-  key = cv2.waitKey(1) & 0xFF
+#   # show the frame
+#   cv2.imshow("Stream", image)
+#   key = cv2.waitKey(1) & 0xFF
 
     
