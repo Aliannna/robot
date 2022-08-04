@@ -5,6 +5,9 @@ from keras.datasets import mnist, cifar10
 from keras.utils import to_categorical
 from keras.layers import Conv2D, BatchNormalization, Activation, MaxPooling2D, Flatten
 from keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.optimizers import Adam
 
 # Load dataset, add channel dimension for images, and one-hot encode labels
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -27,10 +30,6 @@ X_test = X_test / 255.0
 # Display first image in training set
 plt.imshow(X_train[0])
 print('Label: ' + str(np.argmax(y_train[0])))
-
-from keras.models import Sequential
-from keras.layers import Dense, Dropout
-from keras.optimizers import Adam
 
 # Flatten the train images into vectors
 X_train_flattened = X_train.reshape(-1, 28*28)
