@@ -32,6 +32,9 @@ SPEED = 0.6     # bot speed
 
 d = Driver((A1, A2, APWM), (B1, B2, BPWM))
 
+# d.set_effort(SPEED)
+# d.set_theta_effort(0.5)
+
 dists = [0, 0, 0]
 
 ss = 0          # steady state error correction
