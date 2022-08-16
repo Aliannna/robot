@@ -13,9 +13,9 @@ import time, board, busio, adafruit_vl53l0x
 import numpy as np
 from driver import Driver
 
-# Initialize I2C bus and sensor.
-i2c = busio.I2C(board.SCL, board.SDA)
-vl53 = adafruit_vl53l0x.VL53L0X(i2c)
+# # Initialize I2C bus and sensor.
+# i2c = busio.I2C(board.SCL, board.SDA)
+# vl53 = adafruit_vl53l0x.VL53L0X(i2c)
 
 A1 = 27
 A2 = 4
@@ -40,30 +40,34 @@ dists = [0, 0, 0]
 ss = 0          # steady state error correction
 
 while True:
-    time.sleep(0.1)
-    if (not (vl53.range < 1000 and vl53.range - dists[-1] < 500)) \
-        and dists[-1] > 0:
-        print("Rejecting: {0}mm".format(vl53.range))
-        d.set_effort(0.7 * SPEED)
-        d.set_theta_effort(0.3)
-        continue
-
     d.set_effort(SPEED)
-    dists.pop()
-    dists = [vl53.range] + dists
-    dist = np.average(dists)
+    d.set_theta_effort(0.5)
 
-    # robot direction controller (PI controller) --
+# while True:
+#     time.sleep(0.1)
+#     if (not (vl53.range < 1000 and vl53.range - dists[-1] < 500)) \
+#         and dists[-1] > 0:
+#         print("Rejecting: {0}mm".format(vl53.range))
+#         d.set_effort(0.7 * SPEED)
+#         d.set_theta_effort(0.3)
+#         continue
 
-    # propotion term
-    theta_effort = max(min(KP * (DIST_SP - dist) + 0.5 + ss, 1.0), 0.0)
+#     d.set_effort(SPEED)
+#     dists.pop()
+#     dists = [vl53.range] + dists
+#     dist = np.average(dists)
 
-    # integral term
-    ss += KI * (DIST_SP - dist)
-    # ----------------------------------------------
+#     # robot direction controller (PI controller) --
 
-    d.set_theta_effort(theta_effort)
+#     # propotion term
+#     theta_effort = max(min(KP * (DIST_SP - dist) + 0.5 + ss, 1.0), 0.0)
+
+#     # integral term
+#     ss += KI * (DIST_SP - dist)
+#     # ----------------------------------------------
+
+#     d.set_theta_effort(theta_effort)
 
 
-    print("Range: {0}mm".format(vl53.range))
-    print("Effort: {0}".format(theta_effort))
+#     print("Range: {0}mm".format(vl53.range))
+#     print("Effort: {0}".format(theta_effort))
