@@ -13,9 +13,9 @@ import time, board, busio, adafruit_vl53l0x
 import numpy as np
 from driver import Driver
 
-# # Initialize I2C bus and sensor.
-# i2c = busio.I2C(board.SCL, board.SDA)
-# vl53 = adafruit_vl53l0x.VL53L0X(i2c)
+# Initialize I2C bus and sensor.
+i2c = busio.I2C(board.SCL, board.SDA)
+vl53 = adafruit_vl53l0x.VL53L0X(i2c)
 
 A1 = 27
 A2 = 4
@@ -39,9 +39,10 @@ dists = [0, 0, 0]
 
 ss = 0          # steady state error correction
 
+# Main loop will read the range and print it every second.
 while True:
-    d.set_effort(SPEED)
-    d.set_theta_effort(0.5)
+    print("Range: {0}mm".format(vl53.range))
+    time.sleep(1.0)
 
 # while True:
 #     time.sleep(0.1)
