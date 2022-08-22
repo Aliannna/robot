@@ -32,11 +32,26 @@ def setup(xshut0, xshut1, addr0=42, addr1=43):
     # initialize the I2C bus
     i2c = busio.I2C(board.SCL, board.SDA)
 
+    i2c.scan()
+    [hex(x) for x in i2c.scan()]
+
     # initialize one sensor and change the address
+    print("Address Change")
+
+    print("Address Change #1")
     GPIO.output(xshut0, GPIO.HIGH)
     time.sleep(0.1)
+
+    i2c.scan()
+    [hex(x) for x in i2c.scan()]
+
+    print("Address Change #2")
+
     vl530 = adafruit_vl53l0x.VL53L0X(i2c)
     vl530.set_address(addr0)
+
+    i2c.scan()
+    [hex(x) for x in i2c.scan()]
 
     # initialize the next sensor and change the address
     GPIO.output(xshut1, GPIO.HIGH)
